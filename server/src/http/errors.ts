@@ -16,9 +16,15 @@ const MESSAGES = {
   DUPLICATE_ELEMENT: 'Cet enchantement est déjà sur l’arme',
   MAX_RANK: 'Enchantement déjà au rang maximum',
   NOT_ENOUGH_STONES: "Pas assez de pierres d'enchantement",
+  FORGE_CLOSED: 'La forge est fermée pendant une vague',
+  TOO_FAR: 'Approche-toi de la forge',
 } satisfies Record<ForgeError, string> & Record<string, string>;
 
 export type ErrorCode = keyof typeof MESSAGES;
+
+export function errorMessage(code: ErrorCode): string {
+  return MESSAGES[code];
+}
 
 export function sendError(reply: FastifyReply, status: number, code: ErrorCode): FastifyReply {
   return reply.code(status).send({ error: code, message: MESSAGES[code] });

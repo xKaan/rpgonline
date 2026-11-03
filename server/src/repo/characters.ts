@@ -149,3 +149,24 @@ export function saveWeaponAndWallet(db: Db, characterId: number, weapon: WeaponS
   const setStone = db.prepare('UPDATE character_stones SET count = ? WHERE character_id = ? AND element = ?');
   for (const element of ELEMENTS) setStone.run(wallet.stones[element], characterId, element);
 }
+
+export interface LootGain {
+  gold: number;
+  materials: number;
+  stones: Partial<Record<Element, number>>;
+}
+
+/** Ajoute du loot ramassé (incréments atomiques : sûr même si la forge écrit en parallèle). */
+export function addLoot(db: Db, characterId: number, loot: LootGain): void {
+  tx(db, () => {
+    db.prepare('UPDATE characters SET gold = gold + ?, materials = materials + ? WHERE id = ?').run(loot.gold, loot.materials, characterId);
+    const addStone = db.prepare('UPDATE character_stones SET count = count + ? WHERE character_id = ? AND element = ?');
+    for (const [element, n] of Object.entries(loot.stones)) if (n) addStone.run(n, characterId, element);
+  });
+}
+
+/** Enregistre la vague atteinte si c'est un record ; renvoie la meilleure vague. */
+export function recordBestWave(db: Db, characterId: number, wave: number): number {
+  db.prepare('UPDATE characters SET best_wave = MAX(best_wave, ?) WHERE id = ?').run(wave, characterId);
+  return getRow<{ best_wave: number }>(db, 'SELECT best_wave FROM characters WHERE id = ?', characterId)?.best_wave ?? 0;
+}

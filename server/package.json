@@ -10,6 +10,9 @@
     "typecheck": "tsc --noEmit -p ."
   },
   "dependencies": {
+    "@colyseus/core": "^0.18.25",
+    "@colyseus/schema": "^5.0.43",
+    "@colyseus/ws-transport": "^0.18.4",
     "@node-rs/argon2": "^2.2.2",
     "@rpg/shared": "*",
     "fastify": "^5.12.8",
@@ -17,6 +20,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@colyseus/sdk": "^0.18.9",
     "tsx": "^4.23.15"
   }
 }
