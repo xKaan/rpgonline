@@ -28,7 +28,7 @@ export function openForgePanel(root: HTMLElement, opts: ForgePanelOptions): () =
     opts.onClose();
   };
   const onKey = (e: KeyboardEvent) => {
-    if (e.code === 'Escape' || e.code === 'KeyE') {
+    if ((e.code === 'Escape' || e.code === 'KeyE') && !e.repeat) {
       e.preventDefault();
       close();
     }

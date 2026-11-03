@@ -12,6 +12,8 @@ export function createInput(target: HTMLElement) {
   const isLocked = () => document.pointerLockElement === target;
 
   const onKeyDown = (e: KeyboardEvent) => {
+    // hors jeu (pause, forge), les touches appartiennent aux menus
+    if (!isLocked()) return;
     if (e.code === 'Space' || e.code === 'Tab') e.preventDefault();
     held.add(e.code);
     if (!e.repeat) pressed.add(e.code);
@@ -26,7 +28,9 @@ export function createInput(target: HTMLElement) {
     if (e.button === 0 && isLocked()) attack = true;
   };
   const onLockChange = () => {
-    if (!isLocked()) held.clear();
+    held.clear();
+    pressed.clear();
+    attack = false;
     for (const cb of lockListeners) cb(isLocked());
   };
   const onBlur = () => held.clear();
