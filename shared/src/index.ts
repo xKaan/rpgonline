@@ -11,3 +11,5 @@ export * from './waves';
 export * from './shiny';
 export * from './loot';
 export * from './bonuses';
+export * from './combat';
+export * from './protocol';

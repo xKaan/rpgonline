@@ -47,9 +47,14 @@ export function moveDirection(input: MoveInput, yaw: number): { x: number; z: nu
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-export function resolveCollisions(x: number, z: number, obstacles: readonly Obstacle[]): { x: number; z: number } {
+export function resolveCollisions(
+  x: number,
+  z: number,
+  obstacles: readonly Obstacle[],
+  radius = PLAYER_RADIUS,
+): { x: number; z: number } {
   for (const o of obstacles) {
-    const min = o.radius + PLAYER_RADIUS;
+    const min = o.radius + radius;
     const dx = x - o.x;
     const dz = z - o.z;
     const d = Math.hypot(dx, dz);
@@ -61,8 +66,15 @@ export function resolveCollisions(x: number, z: number, obstacles: readonly Obst
       z = o.z + (dz / d) * min;
     }
   }
-  const limit = MAP_HALF_SIZE - PLAYER_RADIUS;
+  const limit = MAP_HALF_SIZE - radius;
   return { x: clamp(x, -limit, limit), z: clamp(z, -limit, limit) };
+}
+
+export interface MotionOptions {
+  /** multiplicateur de la vitesse de course (bonus, ralentissement) */
+  speedMult?: number;
+  /** recharge de la roulade (s) */
+  rollCooldown?: number;
 }
 
 export function stepMotion(
@@ -71,6 +83,7 @@ export function stepMotion(
   yaw: number,
   dt: number,
   obstacles: readonly Obstacle[] = [],
+  opts: MotionOptions = {},
 ): PlayerMotion {
   let { x, z, facing, rollTime, rollDirX, rollDirZ } = m;
   let rollCooldown = Math.max(0, m.rollCooldown - dt);
@@ -79,7 +92,7 @@ export function stepMotion(
 
   if (input.roll && rollTime <= 0 && rollCooldown <= 0) {
     rollTime = ROLL_DURATION;
-    rollCooldown = ROLL_COOLDOWN;
+    rollCooldown = opts.rollCooldown ?? ROLL_COOLDOWN;
     rollDirX = moving ? dir.x : Math.sin(facing);
     rollDirZ = moving ? dir.z : Math.cos(facing);
   }
@@ -91,8 +104,9 @@ export function stepMotion(
     rollTime = Math.max(0, rollTime - dt);
     facing = Math.atan2(rollDirX, rollDirZ);
   } else if (moving) {
-    x += dir.x * PLAYER_SPEED * dt;
-    z += dir.z * PLAYER_SPEED * dt;
+    const speed = PLAYER_SPEED * (opts.speedMult ?? 1);
+    x += dir.x * speed * dt;
+    z += dir.z * speed * dt;
     facing = Math.atan2(dir.x, dir.z);
   }
 
