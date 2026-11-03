@@ -2,19 +2,19 @@ import { z } from 'zod';
 
 export const MAX_CHARACTERS = 5;
 
-/** Modèles de base (KayKit Adventurers), branchés au Plan 3. */
+/** Modèles de base (KayKit Adventurers). */
 export const BASE_MODELS = ['knight', 'barbarian', 'mage', 'rogue', 'rogue_hooded'] as const;
-export const HAIR_STYLE_COUNT = 4;
+export type BaseModel = (typeof BASE_MODELS)[number];
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 
 export const appearanceSchema = z
   .object({
     base: z.enum(BASE_MODELS),
-    skinColor: hexColor,
-    hairStyle: z.number().int().min(0).max(HAIR_STYLE_COUNT - 1),
-    hairColor: hexColor,
+    /** teinte multipliée sur la tenue et la cape ; #ffffff = couleurs d'origine */
     outfitColor: hexColor,
+    headgear: z.boolean(),
+    cape: z.boolean(),
   })
   .strict();
 
@@ -22,11 +22,16 @@ export type Appearance = z.infer<typeof appearanceSchema>;
 
 export const DEFAULT_APPEARANCE: Appearance = {
   base: 'knight',
-  skinColor: '#e0ac69',
-  hairStyle: 0,
-  hairColor: '#4a2c17',
-  outfitColor: '#3b5ba5',
+  outfitColor: '#ffffff',
+  headgear: true,
+  cape: true,
 };
+
+/** Valide une apparence venant de la BDD ; repli sur l'apparence par défaut si elle est invalide ou d'une ancienne version. */
+export function parseAppearance(raw: unknown): Appearance {
+  const parsed = appearanceSchema.safeParse(raw);
+  return parsed.success ? parsed.data : { ...DEFAULT_APPEARANCE };
+}
 
 export const characterNameSchema = z
   .string()

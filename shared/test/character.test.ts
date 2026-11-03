@@ -3,6 +3,7 @@ import {
   appearanceSchema,
   characterNameSchema,
   DEFAULT_APPEARANCE,
+  parseAppearance,
   passwordSchema,
   usernameSchema,
 } from '../src/character';
@@ -12,11 +13,17 @@ describe('apparence', () => {
     expect(appearanceSchema.safeParse(DEFAULT_APPEARANCE).success).toBe(true);
   });
 
-  it('refuse une couleur invalide, une coiffure hors bornes ou un champ inconnu', () => {
-    expect(appearanceSchema.safeParse({ ...DEFAULT_APPEARANCE, skinColor: 'rouge' }).success).toBe(false);
-    expect(appearanceSchema.safeParse({ ...DEFAULT_APPEARANCE, hairStyle: 4 }).success).toBe(false);
+  it('refuse une couleur invalide, un modèle inconnu, un booléen mal typé ou un champ inconnu', () => {
+    expect(appearanceSchema.safeParse({ ...DEFAULT_APPEARANCE, outfitColor: 'rouge' }).success).toBe(false);
     expect(appearanceSchema.safeParse({ ...DEFAULT_APPEARANCE, base: 'dragon' }).success).toBe(false);
+    expect(appearanceSchema.safeParse({ ...DEFAULT_APPEARANCE, headgear: 'oui' }).success).toBe(false);
     expect(appearanceSchema.safeParse({ ...DEFAULT_APPEARANCE, admin: true }).success).toBe(false);
+  });
+
+  it("parseAppearance replie sur l'apparence par défaut pour une ancienne apparence", () => {
+    const legacy = { base: 'mage', skinColor: '#e0ac69', hairStyle: 0, hairColor: '#4a2c17', outfitColor: '#3b5ba5' };
+    expect(parseAppearance(legacy)).toEqual(DEFAULT_APPEARANCE);
+    expect(parseAppearance({ ...DEFAULT_APPEARANCE, base: 'rogue' })).toEqual({ ...DEFAULT_APPEARANCE, base: 'rogue' });
   });
 });
 

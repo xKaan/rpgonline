@@ -91,3 +91,12 @@ describe('noms accentués', () => {
     expect(createCharacter(db, accountId, 'élise', DEFAULT_APPEARANCE)).toBe('NAME_TAKEN');
   });
 });
+
+describe('apparence héritée', () => {
+  it("renvoie l'apparence par défaut si celle stockée n'est plus valide", () => {
+    const c = create('Ancien');
+    db.prepare('UPDATE characters SET appearance = ? WHERE id = ?').run('{"base":"mage","hairStyle":2}', c.id);
+    expect(getCharacter(db, accountId, c.id)?.appearance).toEqual(DEFAULT_APPEARANCE);
+    expect(listCharacters(db, accountId)[0].appearance).toEqual(DEFAULT_APPEARANCE);
+  });
+});

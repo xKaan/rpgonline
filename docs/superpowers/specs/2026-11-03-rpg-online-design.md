@@ -130,7 +130,7 @@ Déplacement vers la cible par grille de navigation de la map (pathfinding lége
 
 - **Authentification :** pseudo + mot de passe (hash argon2), session par jeton (JWT court + refresh, ou cookie httpOnly). Pas d'email en v1.
 - **Personnages :** jusqu'à **5 par compte**. Création/suppression/modification depuis l'écran de sélection.
-- **Éditeur de perso v1 :** choix du modèle de base (parmi les persos KayKit), couleur de peau, coiffure, couleur de cheveux, tenue/couleur de tenue, nom (unique par compte).
+- **Éditeur de perso v1 :** modèle de base (Chevalier, Barbare, Mage, Voleur, Voleur encapuchonné — KayKit), teinte de la tenue et de la cape, chapeau/casque affiché ou non, cape affichée ou non, nom (unique par compte). Les packs KayKit n'ont pas de coiffures séparées, d'où l'abandon de la coiffure/couleur de peau prévues initialement.
 
 ### Modèle de données
 

@@ -3,7 +3,10 @@ import {
   MAX_CHARACTERS,
   WEAPON_TYPES,
   emptyStones,
+  parseAppearance,
   type Appearance,
+  type CharacterDetail,
+  type CharacterSummary,
   type Element,
   type Enchant,
   type EnchantRank,
@@ -13,19 +16,7 @@ import {
 } from '@rpg/shared';
 import { allRows, getRow, tx, type Db } from '../db';
 
-export interface CharacterSummary {
-  id: number;
-  name: string;
-  appearance: Appearance;
-  bestWave: number;
-}
-
-export interface CharacterDetail extends CharacterSummary {
-  gold: number;
-  materials: number;
-  stones: Record<Element, number>;
-  weapons: WeaponState[];
-}
+export type { CharacterDetail, CharacterSummary };
 
 interface CharacterRow {
   id: number;
@@ -51,10 +42,18 @@ const toEnchant = (element: Element | null, rank: number | null): Enchant | null
 /** Clé d'unicité du nom : insensible à la casse, accents compris. */
 const nameKey = (name: string) => name.normalize('NFC').toLowerCase();
 
+const safeJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+};
+
 const toSummary = (r: CharacterRow): CharacterSummary => ({
   id: r.id,
   name: r.name,
-  appearance: JSON.parse(r.appearance) as Appearance,
+  appearance: parseAppearance(safeJson(r.appearance)),
   bestWave: r.best_wave,
 });
 
