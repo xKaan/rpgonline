@@ -42,8 +42,19 @@ describe('comportements', () => {
     const { sim, player } = makeSim();
     place(player, 0, 0);
     monster(sim, 'spider', 0, -1, { attackCooldown: 0 });
-    sim.step(DT);
+    run(sim, 0.5);
     expect(player.statuses.poisonTime).toBeGreaterThan(0);
+  });
+
+  it('le coup de mêlée est annoncé : s’éloigner pendant la préparation l’esquive', () => {
+    const { sim, player } = makeSim();
+    place(player, 0, 0);
+    const g = monster(sim, 'goblin', 0, -1, { attackCooldown: 0, speed: 0 });
+    sim.step(DT);
+    expect(g.action).toBe('attack');
+    place(player, 0, 5);
+    run(sim, 0.5);
+    expect(player.hp).toBe(100);
   });
 
   it('Roi Gobelin : tourbillon puis invocation à 50 % PV', () => {

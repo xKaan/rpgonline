@@ -17,21 +17,34 @@ function timer(m: SimMonster, key: string, every: number, dt: number): boolean {
   return true;
 }
 
+/** préparation d'un coup de mêlée (s) : le temps de rouler hors de portée */
+const MELEE_WINDUP = 0.35;
+/** marge de portée au moment de l'impact */
+const MELEE_SLACK = 0.4;
+
 const edgeDistance = (m: SimMonster, dist: number) => dist - m.radius - PLAYER_RADIUS;
 
-/** Fonce et frappe au contact (gobelin, araignée, base des boss). */
+/** Fonce et frappe au contact (gobelin, araignée, base des boss), après une courte préparation esquivable. */
 function melee(w: World, m: SimMonster, p: SimPlayer, dist: number, dt: number, speedMult = 1): void {
   const st = ENEMIES[m.kind];
+  if (m.action === 'attack' && m.actionTime > 0) {
+    faceTowards(m, p.motion.x, p.motion.z);
+    m.timers.strike -= dt;
+    if (m.timers.strike <= 0 && m.timers.strike > -dt) {
+      if (edgeDistance(m, dist) <= st.attackRange + MELEE_SLACK) monsterHitsPlayer(w, p, m.damage, { kind: m.kind, effects: m.shiny, melee: m });
+    }
+    return;
+  }
   if (edgeDistance(m, dist) > st.attackRange * 0.8) moveMonster(w, m, p.motion.x, p.motion.z, dt, speedMult);
   else {
     faceTowards(m, p.motion.x, p.motion.z);
-    if (m.actionTime <= 0) m.action = 'idle';
+    m.action = 'idle';
   }
   if (edgeDistance(m, dist) <= st.attackRange && m.attackCooldown <= 0) {
     m.attackCooldown = st.attackCooldown;
     m.action = 'attack';
-    m.actionTime = 0.3;
-    monsterHitsPlayer(w, p, m.damage, { kind: m.kind, effects: m.shiny, melee: m });
+    m.actionTime = MELEE_WINDUP + 0.15;
+    m.timers.strike = MELEE_WINDUP;
   }
 }
 

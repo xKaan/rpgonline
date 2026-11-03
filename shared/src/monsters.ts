@@ -21,10 +21,10 @@ export interface EnemyStats {
 }
 
 export const ENEMIES: Record<EnemyKind, EnemyStats> = {
-  goblin: { label: 'Gobelin', hp: 30, damage: 6, speed: 4.5, radius: 0.45, attackRange: 0.5, attackCooldown: 1, gold: 3, materials: 0, boss: false },
+  goblin: { label: 'Gobelin', hp: 30, damage: 6, speed: 4.5, radius: 0.45, attackRange: 0.5, attackCooldown: 1.4, gold: 3, materials: 0, boss: false },
   archer: { label: 'Squelette archer', hp: 25, damage: 8, speed: 2, radius: 0.45, attackRange: 14, attackCooldown: 2.2, gold: 4, materials: 0, boss: false },
   golem: { label: 'Golem', hp: 120, damage: 15, speed: 1.5, radius: 0.9, attackRange: 1.6, attackCooldown: 3, gold: 10, materials: 1, boss: false },
-  spider: { label: 'Araignée', hp: 20, damage: 4, speed: 6.5, radius: 0.4, attackRange: 0.4, attackCooldown: 0.8, gold: 2, materials: 0, boss: false },
+  spider: { label: 'Araignée', hp: 20, damage: 4, speed: 6.5, radius: 0.4, attackRange: 0.4, attackCooldown: 1.2, gold: 2, materials: 0, boss: false },
   goblin_king: { label: 'Roi Gobelin', hp: 800, damage: 18, speed: 4, radius: 1.2, attackRange: 0.7, attackCooldown: 1.2, gold: 150, materials: 5, boss: true },
   ancient_golem: { label: 'Golem ancien', hp: 1500, damage: 25, speed: 1.6, radius: 1.5, attackRange: 1, attackCooldown: 2.2, gold: 250, materials: 10, boss: true },
 };
