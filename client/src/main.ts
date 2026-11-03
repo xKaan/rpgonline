@@ -1,10 +1,10 @@
 import './ui/style.css';
 import { createApi } from './api';
+import { startGame } from './game/game';
 import { browserStorage, createSession } from './session';
 import { renderAuth } from './ui/authScreen';
 import { renderCharacters } from './ui/charactersScreen';
 import type { AppContext, Route } from './ui/context';
-import { h } from './ui/dom';
 import { renderEditor } from './ui/editorScreen';
 
 const app = document.getElementById('app')!;
@@ -38,12 +38,17 @@ async function show(route: Route): Promise<void> {
       dispose = renderEditor(app, ctx, route.character);
       break;
     case 'game':
-      app.append(
-        h('div', { class: 'screen' }, h('div', { class: 'panel' }, h('p', {}, `Le jeu arrive à la Task 7 (${route.character.name}).`), h('button', { onclick: () => go({ name: 'characters' }) }, 'Retour'))),
-      );
+      try {
+        const stop = await startGame(app, { character: route.character, api, onQuit: () => go({ name: 'characters' }) });
+        if (id !== navigation) stop();
+        else dispose = stop;
+      } catch (e) {
+        console.error(e);
+        alert('Impossible de charger le jeu (modèles 3D introuvables ?)');
+        go({ name: 'characters' });
+      }
       break;
   }
-  if (id !== navigation) return;
 }
 
 function go(route: Route): void {

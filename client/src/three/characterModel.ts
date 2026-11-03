@@ -10,6 +10,7 @@ const cache = new Map<BaseModel, Promise<GLTF>>();
 const FADE = 0.15;
 /** placement des armes dans `handslot.r`, identique aux armes intégrées des persos KayKit */
 const WEAPON_OFFSET_Y = 0.0333;
+const WEAPON_BONE = 'handslot.r';
 
 function loadBase(base: BaseModel): Promise<GLTF> {
   let p = cache.get(base);
@@ -42,7 +43,10 @@ export class CharacterModel {
     this.root = cloneSkinned(gltf.scene);
     this.mixer = new THREE.AnimationMixer(this.root);
     for (const clip of gltf.animations) this.actions.set(clip.name, this.mixer.clipAction(clip));
-    this.weaponSlot = this.root.getObjectByName('handslot.r') ?? this.root;
+    // GLTFLoader nettoie les noms de nœuds (« handslot.r » devient « handslotr »)
+    const slot = this.root.getObjectByName(THREE.PropertyBinding.sanitizeNodeName(WEAPON_BONE));
+    if (!slot) console.warn(`Os « ${WEAPON_BONE} » introuvable : l'arme sera attachée à la racine du modèle`);
+    this.weaponSlot = slot ?? this.root;
     this.root.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
