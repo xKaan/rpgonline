@@ -21,7 +21,7 @@ export async function renderCharacters(root: HTMLElement, ctx: AppContext): Prom
       'div',
       { class: 'card' },
       h('h3', {}, c.name),
-      h('p', { class: 'hint' }, `${BASE_LABELS[c.appearance.base]} · meilleure vague : ${c.bestWave}`),
+      h('p', { class: 'hint' }, `${BASE_LABELS[c.appearance.base]} · meilleure vague\u00a0:\u00a0${c.bestWave}`),
       h(
         'div',
         { class: 'row' },
