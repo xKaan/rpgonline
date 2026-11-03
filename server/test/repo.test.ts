@@ -84,3 +84,10 @@ describe('personnages', () => {
     });
   });
 });
+
+describe('noms accentués', () => {
+  it('refuse un nom identique à la casse près, accents compris', () => {
+    create('Élise');
+    expect(createCharacter(db, accountId, 'élise', DEFAULT_APPEARANCE)).toBe('NAME_TAKEN');
+  });
+});

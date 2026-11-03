@@ -13,13 +13,14 @@ CREATE TABLE IF NOT EXISTS characters (
   id INTEGER PRIMARY KEY,
   account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  name_key TEXT NOT NULL,
   appearance TEXT NOT NULL,
   gold INTEGER NOT NULL DEFAULT 0,
   materials INTEGER NOT NULL DEFAULT 0,
   best_wave INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-CREATE UNIQUE INDEX IF NOT EXISTS characters_account_name ON characters(account_id, name COLLATE NOCASE);
+CREATE UNIQUE INDEX IF NOT EXISTS characters_account_name ON characters(account_id, name_key);
 CREATE TABLE IF NOT EXISTS character_weapons (
   character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
   weapon_type TEXT NOT NULL,

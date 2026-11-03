@@ -48,6 +48,9 @@ interface WeaponRow {
 const toEnchant = (element: Element | null, rank: number | null): Enchant | null =>
   element && rank ? { element, rank: rank as EnchantRank } : null;
 
+/** Clé d'unicité du nom : insensible à la casse, accents compris. */
+const nameKey = (name: string) => name.normalize('NFC').toLowerCase();
+
 const toSummary = (r: CharacterRow): CharacterSummary => ({
   id: r.id,
   name: r.name,
@@ -107,12 +110,12 @@ export function createCharacter(
   const id = tx(db, (): number | 'LIMIT' | 'NAME_TAKEN' => {
     const { n } = getRow<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM characters WHERE account_id = ?', accountId)!;
     if (n >= MAX_CHARACTERS) return 'LIMIT';
-    const taken = getRow(db, 'SELECT 1 FROM characters WHERE account_id = ? AND name = ? COLLATE NOCASE', accountId, name);
+    const taken = getRow(db, 'SELECT 1 FROM characters WHERE account_id = ? AND name_key = ?', accountId, nameKey(name));
     if (taken) return 'NAME_TAKEN';
 
     const res = db
-      .prepare('INSERT INTO characters (account_id, name, appearance) VALUES (?, ?, ?)')
-      .run(accountId, name, JSON.stringify(appearance));
+      .prepare('INSERT INTO characters (account_id, name, name_key, appearance) VALUES (?, ?, ?, ?)')
+      .run(accountId, name, nameKey(name), JSON.stringify(appearance));
     const characterId = Number(res.lastInsertRowid);
     const insertWeapon = db.prepare('INSERT INTO character_weapons (character_id, weapon_type) VALUES (?, ?)');
     for (const type of WEAPON_TYPES) insertWeapon.run(characterId, type);
