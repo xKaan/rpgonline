@@ -1,6 +1,7 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { appearanceSchema, characterNameSchema } from '@rpg/shared';
+import { ELEMENTS, appearanceSchema, characterNameSchema, isWeaponType } from '@rpg/shared';
+import { runForgeAction, type ForgeAction, type ForgeServiceResult } from '../forgeService';
 import { createCharacter, deleteCharacter, getCharacter, listCharacters, updateAppearance } from '../repo/characters';
 import type { AppDeps } from './deps';
 import { sendError } from './errors';
@@ -8,6 +9,14 @@ import { requireAuth } from './requireAuth';
 
 const createBody = z.object({ name: characterNameSchema, appearance: appearanceSchema });
 const patchBody = z.object({ appearance: appearanceSchema });
+const enchantBody = z.object({ slot: z.union([z.literal(0), z.literal(1)]), element: z.enum(ELEMENTS) });
+
+type WeaponParams = { Params: { id: string; type: string } };
+
+function sendForgeResult(reply: FastifyReply, result: ForgeServiceResult) {
+  if (result.ok) return reply.send(result.character);
+  return sendError(reply, result.error === 'NOT_FOUND' ? 404 : 400, result.error);
+}
 
 type IdParams = { Params: { id: string } };
 
@@ -52,6 +61,22 @@ export function registerCharacterRoutes(app: FastifyInstance, deps: AppDeps): vo
       const id = parseId(req.params.id);
       if (id === null || !deleteCharacter(db, req.accountId, id)) return sendError(reply, 404, 'NOT_FOUND');
       return reply.code(204).send();
+    });
+
+    const forge = (req: { accountId: number; params: { id: string; type: string } }, reply: FastifyReply, action: ForgeAction) => {
+      const id = parseId(req.params.id);
+      if (id === null || !isWeaponType(req.params.type)) return sendError(reply, 404, 'NOT_FOUND');
+      return sendForgeResult(reply, runForgeAction(db, req.accountId, id, req.params.type, action));
+    };
+
+    scope.post<WeaponParams>('/api/characters/:id/weapons/:type/upgrade', async (req, reply) =>
+      forge(req, reply, { kind: 'upgrade' }),
+    );
+
+    scope.post<WeaponParams>('/api/characters/:id/weapons/:type/enchant', async (req, reply) => {
+      const body = enchantBody.safeParse(req.body);
+      if (!body.success) return sendError(reply, 400, 'VALIDATION');
+      return forge(req, reply, { kind: 'enchant', ...body.data });
     });
   });
 }
