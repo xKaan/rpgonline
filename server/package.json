@@ -10,7 +10,11 @@
     "typecheck": "tsc --noEmit -p ."
   },
   "dependencies": {
-    "@rpg/shared": "*"
+    "@node-rs/argon2": "^2.2.2",
+    "@rpg/shared": "*",
+    "fastify": "^5.12.8",
+    "jose": "^6.2.15",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "tsx": "^4.23.15"
