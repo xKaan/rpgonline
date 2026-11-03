@@ -1,5 +1,5 @@
 import './ui/style.css';
-import { createApi } from './api';
+import { ApiError, createApi } from './api';
 import { startGame } from './game/game';
 import { browserStorage, createSession } from './session';
 import { renderAuth } from './ui/authScreen';
@@ -37,17 +37,29 @@ async function show(route: Route): Promise<void> {
     case 'editor':
       dispose = renderEditor(app, ctx, route.character);
       break;
-    case 'game':
+    case 'game': {
+      const character = route.character;
       try {
-        const stop = await startGame(app, { character: route.character, api, onQuit: () => go({ name: 'characters' }) });
+        const stop = await startGame(app, {
+          character,
+          token: session.token ?? '',
+          onQuit: () => go({ name: 'characters' }),
+          onRestart: () => {
+            void api.getCharacter(character.id).then(
+              (c) => go({ name: 'game', character: c }),
+              () => go({ name: 'characters' }),
+            );
+          },
+        });
         if (id !== navigation) stop();
         else dispose = stop;
       } catch (e) {
         console.error(e);
-        alert('Impossible de charger le jeu (modèles 3D introuvables ?)');
+        alert(e instanceof ApiError ? e.message : 'Impossible de charger le jeu (modèles 3D introuvables ?)');
         go({ name: 'characters' });
       }
       break;
+    }
   }
 }
 

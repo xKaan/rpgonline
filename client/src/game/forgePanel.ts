@@ -1,11 +1,11 @@
 import { ELEMENTS, ENCHANT_EFFECTS, type CharacterDetail, type Element } from '@rpg/shared';
-import type { Api } from '../api';
+import type { ForgeApi } from '../net/forgeApi';
 import { errorMessage, h } from '../ui/dom';
 import { enchantLabel, forgeRows, type WeaponRowView } from './forgeView';
 
 export interface ForgePanelOptions {
   character: CharacterDetail;
-  api: Api;
+  api: ForgeApi;
   onChange(c: CharacterDetail): void;
   onClose(): void;
 }

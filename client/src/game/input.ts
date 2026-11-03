@@ -7,6 +7,7 @@ export function createInput(target: HTMLElement) {
   let dx = 0;
   let dy = 0;
   let attack = false;
+  let release = false;
   const lockListeners: ((locked: boolean) => void)[] = [];
 
   const isLocked = () => document.pointerLockElement === target;
@@ -27,10 +28,15 @@ export function createInput(target: HTMLElement) {
   const onMouseDown = (e: MouseEvent) => {
     if (e.button === 0 && isLocked()) attack = true;
   };
+  const onMouseUp = (e: MouseEvent) => {
+    if (e.button === 0) release = true;
+  };
   const onLockChange = () => {
     held.clear();
     pressed.clear();
     attack = false;
+    // perdre la souris relâche l'attaque (arc chargé)
+    release = true;
     for (const cb of lockListeners) cb(isLocked());
   };
   const onBlur = () => held.clear();
@@ -40,6 +46,7 @@ export function createInput(target: HTMLElement) {
   window.addEventListener('blur', onBlur);
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('mouseup', onMouseUp);
   document.addEventListener('pointerlockchange', onLockChange);
 
   return {
@@ -63,6 +70,12 @@ export function createInput(target: HTMLElement) {
       attack = false;
       return out;
     },
+    /** vrai une fois après le relâchement du clic gauche */
+    consumeRelease() {
+      const out = release;
+      release = false;
+      return out;
+    },
     consumePressed(code: string) {
       return pressed.delete(code);
     },
@@ -82,6 +95,7 @@ export function createInput(target: HTMLElement) {
       window.removeEventListener('blur', onBlur);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('pointerlockchange', onLockChange);
       if (isLocked()) document.exitPointerLock();
     },
