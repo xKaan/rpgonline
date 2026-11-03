@@ -43,6 +43,7 @@ export function renderAuth(root: HTMLElement, ctx: AppContext): void {
       },
     },
     h('h1', {}, 'RPG Online'),
+    h('p', { class: 'tagline' }, 'Défends la forge, vague après vague.'),
     username,
     password,
     hint,

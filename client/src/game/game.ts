@@ -32,8 +32,16 @@ import { openBonusPanel, openMessagePanel, openRunOverPanel } from './runPanels'
 import { buildWorld } from './world';
 
 const MOUSE_SENSITIVITY = 0.0025;
-const CONTROLS_HELP =
-  'ZQSD : se déplacer · Souris : viser · Clic : attaquer (maintenir avec l’arc) · Espace : roulade · 1-7 : armes · E : forge (pendant le répit) · Entrée : lancer la vague · Échap : pause';
+const CONTROLS: [string, string][] = [
+  ['ZQSD', 'se déplacer'],
+  ['Souris', 'viser'],
+  ['Clic', 'attaquer (maintenir avec l’arc)'],
+  ['Espace', 'roulade'],
+  ['1 à 7', 'changer d’arme'],
+  ['E', 'forge, pendant le répit'],
+  ['Entrée', 'lancer la vague'],
+  ['Échap', 'pause'],
+];
 
 export interface GameOptions {
   character: CharacterDetail;
@@ -103,7 +111,7 @@ export async function startGame(root: HTMLElement, opts: GameOptions): Promise<(
       h('h2', {}, character.name),
       h('button', { onclick: () => input.lock() }, 'Jouer'),
       h('button', { class: 'secondary', onclick: () => opts.onQuit() }, 'Abandonner la run'),
-      h('p', { class: 'hint' }, CONTROLS_HELP),
+      h('dl', { class: 'controls' }, ...CONTROLS.flatMap(([key, action]) => [h('dt', {}, h('kbd', {}, key)), h('dd', {}, action)])),
     ),
   );
   container.append(pauseOverlay);
